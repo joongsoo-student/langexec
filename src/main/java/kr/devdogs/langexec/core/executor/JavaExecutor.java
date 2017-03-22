@@ -71,7 +71,11 @@ public class JavaExecutor implements LanguageExecutor {
 					e.printStackTrace();
 				}
 			}
-			outputThread.join();
+			
+			outputThread.join(2000); 
+			if(outputThread.isAlive()) {
+				outputThread.destroy();
+			}
 			return outputThread.getResult();
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);
