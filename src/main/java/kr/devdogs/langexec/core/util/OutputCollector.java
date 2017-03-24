@@ -2,6 +2,8 @@ package kr.devdogs.langexec.core.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OutputCollector extends Thread{
 	private InputStream m_isInputStream;
@@ -24,7 +26,8 @@ public class OutputCollector extends Thread{
 					InputStream stream = m_isInputStream.available() > 0 ? m_isInputStream : m_esErrorStream;
 					byte[] b = new byte[stream.available()];
 					stream.read(b);
-					result.append(new String(b) + "\n");
+					String output = new String(b);
+					result.append(output);
 					if(!currentProcess.isAlive()) {
 						return;
 					}
@@ -32,13 +35,18 @@ public class OutputCollector extends Thread{
 				Thread.sleep(100L);
 			}
 		} catch (IOException e) {
-			result.append(e.getMessage());
+			result.append(e.getMessage() + "\n");
 		} catch (InterruptedException e) {
-			result.append(e.getMessage());
+			result.append(e.getMessage() + "\n");
 		}
 	}
 
-	public String getResult() {
-		return result.toString();
+	public List<String> getResult() {
+		List<String> resultLines = new ArrayList<>();
+		String[] lines = result.toString().split("\n");
+		for(String line : lines) {
+			resultLines.add(line);
+		}
+		return resultLines;
 	}
 }

@@ -1,4 +1,4 @@
-package kr.devdogs.langexec.core.executor;
+package kr.devdogs.langexec.core.execute;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,25 +9,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import kr.devdogs.langexec.LanguageExecutor;
-import kr.devdogs.langexec.core.compile.Compiler;
+import kr.devdogs.langexec.LanguageCompiler;
+import kr.devdogs.langexec.LanguageRunner;
 import kr.devdogs.langexec.core.exception.CompileFailException;
 import kr.devdogs.langexec.core.exception.RunningFailedException;
 import kr.devdogs.langexec.core.util.FileUtils;
 import kr.devdogs.langexec.core.util.OutputCollector;
 
-public class JavaExecutor implements LanguageExecutor {
-	private Compiler complier;
+public class JavaRunner implements LanguageRunner {
+	private LanguageCompiler complier;
 	private OutputCollector outputCollector;
 	
-	public JavaExecutor(Compiler compiler) {
+	public JavaRunner(LanguageCompiler compiler) {
 		this.complier = compiler;
 	}
 	
 	@Override
-	public String run(File sourceFile, List<String> inputLines) {
+	public List<String> run(File sourceFile, List<String> inputLines) {
 		String compiledClassPath = compile(sourceFile);
-		String runResult = execute(sourceFile, inputLines);
+		List<String> runResult = execute(sourceFile, inputLines);
 		new File(compiledClassPath).delete();
 		return runResult;
 	}
@@ -47,8 +47,13 @@ public class JavaExecutor implements LanguageExecutor {
 		return compiledFilePath;
 	}
 	
-	
-	private String execute(File sourceFile, List<String> inputLines) {
+	/**
+	 * 
+	 * @param sourceFile
+	 * @param inputLines
+	 * @return outputLines
+	 */
+	private List<String> execute(File sourceFile, List<String> inputLines) {
 		String filePath = FileUtils.getAbsolutePath(sourceFile);
 		String fileName = FileUtils.getFileName(sourceFile);
 		
@@ -73,9 +78,11 @@ public class JavaExecutor implements LanguageExecutor {
 			}
 			
 			outputThread.join(2000); 
-			if(outputThread.isAlive()) {
-				outputThread.destroy();
-			}
+			try {
+				if(outputThread.isAlive()) {
+					outputThread.destroy();
+				}
+			}catch(NoSuchMethodError err) {}
 			return outputThread.getResult();
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);

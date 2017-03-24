@@ -16,7 +16,7 @@ public class TestDriver {
 				inputs.add(str);
 			}
 			File input = new File("/Users/st/Test3.java");
-			System.out.println(ExecutorFactory.getJavaExecutor().run(input, inputs));
+			System.out.println(RunnerFactory.getJavaExecutor().run(input, inputs));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
