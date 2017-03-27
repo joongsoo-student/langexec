@@ -13,15 +13,17 @@ import kr.devdogs.langexec.LanguageCompiler;
 import kr.devdogs.langexec.LanguageRunner;
 import kr.devdogs.langexec.core.exception.CompileFailException;
 import kr.devdogs.langexec.core.exception.RunningFailedException;
+import kr.devdogs.langexec.core.output.OutputDelegate;
+import kr.devdogs.langexec.core.event.ProcessEventListener;
 import kr.devdogs.langexec.core.util.FileUtils;
-import kr.devdogs.langexec.core.util.OutputCollector;
 
-public class JavaRunner implements LanguageRunner {
+public class JavaRunner implements LanguageRunner, ProcessEventListener {
 	private LanguageCompiler complier;
-	private OutputCollector outputCollector;
+	private List<String> resultList;
 	
 	public JavaRunner(LanguageCompiler compiler) {
 		this.complier = compiler;
+		this.resultList = new ArrayList<>();
 	}
 	
 	@Override
@@ -65,7 +67,7 @@ public class JavaRunner implements LanguageRunner {
 			OutputStream stdin = process.getOutputStream();
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
 			
-			OutputCollector outputThread = new OutputCollector(process);
+			OutputDelegate outputThread = new OutputDelegate(process, this);
 			outputThread.start();
 			for(String temp: inputLines) {
 				try {
@@ -83,9 +85,18 @@ public class JavaRunner implements LanguageRunner {
 					outputThread.destroy();
 				}
 			}catch(NoSuchMethodError err) {}
-			return outputThread.getResult();
+			
+			return this.resultList;
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);
 		}
 	}
+
+	@Override
+	public void onOutput(String outputLines) {
+		this.resultList.add(outputLines);
+	}
+
+	@Override
+	public void onProcessDestroy() {}
 }

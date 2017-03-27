@@ -7,18 +7,21 @@ import java.util.Scanner;
 
 public class TestDriver {
 	public static void main(String[] arg) {
-		Scanner scan;
-		try {
-			scan = new Scanner(new File("/Users/st/Test2.txt"));
-			List<String> inputs = new ArrayList<>();
-			String str = null;
-			while(scan.hasNextLine() && (str = scan.nextLine()) != null) {
-				inputs.add(str);
+		try(Scanner scan = new Scanner(System.in)) {
+			File sourceFile = new File("/Users/st/Test.java");
+			LanguageLiveShell shell = LiveShellFactory.getJavaLiveShell(sourceFile);
+			
+			shell.addOnOutputListener(new CustomOnOutputListener() {
+				@Override
+				public void onOutput(String output) {
+					System.out.print(output);
+				}
+			});
+			
+			while(true) {
+				String line = scan.nextLine();
+				shell.writeLine(line);
 			}
-			File input = new File("/Users/st/Test3.java");
-			System.out.println(RunnerFactory.getJavaExecutor().run(input, inputs));
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 }

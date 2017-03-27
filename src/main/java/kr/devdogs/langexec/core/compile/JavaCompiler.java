@@ -2,14 +2,22 @@ package kr.devdogs.langexec.core.compile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import kr.devdogs.langexec.LanguageCompiler;
+import kr.devdogs.langexec.core.event.ProcessEventListener;
 import kr.devdogs.langexec.core.exception.CompileFailException;
+import kr.devdogs.langexec.core.output.OutputDelegate;
 import kr.devdogs.langexec.core.util.FileUtils;
-import kr.devdogs.langexec.core.util.OutputCollector;
 
-public class JavaCompiler implements LanguageCompiler {
+public class JavaCompiler implements LanguageCompiler, ProcessEventListener {
+	private List<String> outputLines;
+	
+	public JavaCompiler() {
+		outputLines = new ArrayList<>();
+	}
+	
 	@Override
 	public String compile(File sourceFile) throws IOException {
 		String filePath = FileUtils.getAbsolutePath(sourceFile);
@@ -41,7 +49,7 @@ public class JavaCompiler implements LanguageCompiler {
 		builder.directory(new File(filePath));
 		Process compileProc = builder.start();
 		
-		OutputCollector outputThread = new OutputCollector(compileProc);
+		OutputDelegate outputThread = new OutputDelegate(compileProc, this);
 		outputThread.start();
 		try {
 			compileProc.waitFor();
@@ -61,7 +69,16 @@ public class JavaCompiler implements LanguageCompiler {
 			compiledFile.delete();
 			return null;
 		} else {
-			return outputThread.getResult();
+			return this.outputLines;
 		}
+	}
+
+	@Override
+	public void onOutput(String output) {
+		this.outputLines.add(output);
+	}
+
+	@Override
+	public void onProcessDestroy() {
 	}
 }
