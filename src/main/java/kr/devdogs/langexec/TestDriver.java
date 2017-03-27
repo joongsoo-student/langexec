@@ -18,7 +18,7 @@ public class TestDriver {
 				}
 			});
 			
-			while(true) {
+			while(shell.isRunning()) {
 				String line = scan.nextLine();
 				shell.writeLine(line);
 			}

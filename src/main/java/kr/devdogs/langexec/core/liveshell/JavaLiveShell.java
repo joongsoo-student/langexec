@@ -25,13 +25,14 @@ public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
 	private BufferedWriter processWriter;
 	private String compiledClassPath;
 	private List<CustomOnOutputListener> outputListenerList;
+	private boolean running;
 	
 	public JavaLiveShell(File sourceFile, LanguageCompiler compiler) {
 		this.complier = compiler;
 		this.outputLine = new ArrayList<>();
 		this.outputListenerList = new ArrayList<>();
 		
-		compiledClassPath = compile(sourceFile);
+		this.compiledClassPath = compile(sourceFile);
 		String filePath = FileUtils.getAbsolutePath(sourceFile);
 		String fileName = FileUtils.getFileName(sourceFile);
 		
@@ -44,7 +45,8 @@ public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
 			this.processWriter = new BufferedWriter(new OutputStreamWriter(stdin));
 			
 			this.outputCollector = new OutputDelegate(this.currentProcess, this);
-			outputCollector.start();
+			this.outputCollector.start();
+			this.running = true;
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);
 		}
@@ -100,5 +102,10 @@ public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
 	@Override
 	public void addOnOutputListener(CustomOnOutputListener outputListener) {
 		this.outputListenerList.add(outputListener);
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 }

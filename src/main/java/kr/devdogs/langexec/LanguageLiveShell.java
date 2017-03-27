@@ -6,4 +6,5 @@ public interface LanguageLiveShell {
 	public void writeLine(String line);
 	public List<String> getOutputLines();
 	public void addOnOutputListener(CustomOnOutputListener outputListener);
+	public boolean isRunning();
 }
