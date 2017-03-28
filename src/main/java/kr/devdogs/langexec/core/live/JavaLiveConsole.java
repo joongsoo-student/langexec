@@ -1,4 +1,4 @@
-package kr.devdogs.langexec.core.liveshell;
+package kr.devdogs.langexec.core.live;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,16 +10,16 @@ import java.util.List;
 
 import kr.devdogs.langexec.CustomOnOutputListener;
 import kr.devdogs.langexec.LanguageCompiler;
-import kr.devdogs.langexec.LanguageLiveShell;
+import kr.devdogs.langexec.LanguageLiveConsole;
 import kr.devdogs.langexec.core.exception.CompileFailException;
 import kr.devdogs.langexec.core.exception.RunningFailedException;
 import kr.devdogs.langexec.core.output.OutputDelegate;
 import kr.devdogs.langexec.core.event.ProcessEventListener;
 import kr.devdogs.langexec.core.util.FileUtils;
 
-public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
+public class JavaLiveConsole implements LanguageLiveConsole, ProcessEventListener {
 	private LanguageCompiler complier;
-	private OutputDelegate outputCollector;
+	private OutputDelegate outputDelegate;
 	private List<String> outputLine;
 	private Process currentProcess;
 	private BufferedWriter processWriter;
@@ -27,7 +27,7 @@ public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
 	private List<CustomOnOutputListener> outputListenerList;
 	private boolean running;
 	
-	public JavaLiveShell(File sourceFile, LanguageCompiler compiler) {
+	public JavaLiveConsole(File sourceFile, LanguageCompiler compiler) {
 		this.complier = compiler;
 		this.outputLine = new ArrayList<>();
 		this.outputListenerList = new ArrayList<>();
@@ -44,8 +44,8 @@ public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
 			OutputStream stdin = this.currentProcess.getOutputStream();
 			this.processWriter = new BufferedWriter(new OutputStreamWriter(stdin));
 			
-			this.outputCollector = new OutputDelegate(this.currentProcess, this);
-			this.outputCollector.start();
+			this.outputDelegate = new OutputDelegate(this.currentProcess, this);
+			this.outputDelegate.start();
 			this.running = true;
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);
@@ -93,6 +93,18 @@ public class JavaLiveShell implements LanguageLiveShell, ProcessEventListener {
 
 	@Override
 	public void onProcessDestroy() {
+		this.running = false;
+		
+		// Thread Kill
+		try {
+			outputDelegate.join(2000);
+		} catch (InterruptedException e) {} 
+		try {
+			if(outputDelegate.isAlive()) {
+				outputDelegate.destroy();
+			}
+		}catch(NoSuchMethodError err) {}
+		
 		File compileFile = new File(compiledClassPath);
 		if(compileFile.exists()) {
 			compileFile.delete();

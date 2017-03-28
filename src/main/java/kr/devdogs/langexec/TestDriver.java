@@ -9,7 +9,7 @@ public class TestDriver {
 	public static void main(String[] arg) {
 		try(Scanner scan = new Scanner(System.in)) {
 			File sourceFile = new File("/Users/st/Test.java");
-			LanguageLiveShell shell = LiveShellFactory.getJavaLiveShell(sourceFile);
+			LanguageLiveConsole shell = LiveShellFactory.getJavaLiveShell(sourceFile);
 			
 			shell.addOnOutputListener(new CustomOnOutputListener() {
 				@Override
