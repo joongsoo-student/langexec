@@ -5,8 +5,8 @@ import java.io.File;
 import kr.devdogs.langexec.core.compile.JavaCompiler;
 import kr.devdogs.langexec.core.live.JavaLiveConsole;
 
-public class LiveShellFactory {
-	public static LanguageLiveConsole getJavaLiveShell(File sourceFile) {
+public class LiveConsoleFactory {
+	public static LanguageLiveConsole getJavaLiveConsole(File sourceFile) {
 		return new JavaLiveConsole(sourceFile, new JavaCompiler());
 	}
 }

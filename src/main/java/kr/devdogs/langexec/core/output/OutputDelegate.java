@@ -22,7 +22,7 @@ public class OutputDelegate extends Thread {
 	public void run() {
 		try {
 			dead:while(true) {
-				while (m_isInputStream.available() > 0 || m_esErrorStream.available() > 0) {
+				if(m_isInputStream.available() > 0 || m_esErrorStream.available() > 0) {
 					InputStream stream = m_isInputStream.available() > 0 ? m_isInputStream : m_esErrorStream;
 					byte[] b = new byte[stream.available()];
 					stream.read(b);

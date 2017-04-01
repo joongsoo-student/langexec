@@ -34,7 +34,6 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 		return runResult;
 	}
 	
-	
 	private String compile(File sourceFile) {
 		String compiledFilePath = null;
 		try {
@@ -55,7 +54,7 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 	 * @param inputLines
 	 * @return outputLines
 	 */
-	private List<String> execute(File sourceFile, List<String> inputLines) {
+	private synchronized List<String> execute(File sourceFile, List<String> inputLines) {
 		String filePath = FileUtils.getAbsolutePath(sourceFile);
 		String fileName = FileUtils.getFileName(sourceFile);
 		
@@ -78,14 +77,7 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 					e.printStackTrace();
 				}
 			}
-			
-			outputThread.join(2000); 
-			try {
-				if(outputThread.isAlive()) {
-					outputThread.destroy();
-				}
-			}catch(NoSuchMethodError err) {}
-			
+			wait();
 			return this.resultList;
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);
@@ -98,5 +90,7 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 	}
 
 	@Override
-	public void onProcessDestroy() {}
+	public synchronized void onProcessDestroy() {
+		notify();
+	}
 }
