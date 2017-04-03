@@ -95,16 +95,6 @@ public class JavaLiveConsole implements LanguageLiveConsole, ProcessEventListene
 	public void onProcessDestroy() {
 		this.running = false;
 		
-		// Thread Kill
-		try {
-			outputDelegate.join(2000);
-		} catch (InterruptedException e) {} 
-		try {
-			if(outputDelegate.isAlive()) {
-				outputDelegate.destroy();
-			}
-		}catch(NoSuchMethodError err) {}
-		
 		File compileFile = new File(compiledClassPath);
 		if(compileFile.exists()) {
 			compileFile.delete();

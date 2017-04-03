@@ -10,6 +10,6 @@ public interface LanguageRunner {
 	 * @param inputLines
 	 * @return outputLines
 	 */
-	public List<String> run(File sourceFile, List<String> inputLines);
-	
+	public RunningOutput run(List<String> inputLines);
+	public RunningOutput run();
 }

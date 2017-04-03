@@ -1,4 +1,4 @@
-package kr.devdogs.langexec.core.execute;
+package kr.devdogs.langexec.core.run;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,7 +11,9 @@ import java.util.Scanner;
 
 import kr.devdogs.langexec.LanguageCompiler;
 import kr.devdogs.langexec.LanguageRunner;
+import kr.devdogs.langexec.RunningOutput;
 import kr.devdogs.langexec.core.exception.CompileFailException;
+import kr.devdogs.langexec.core.exception.ProcessTimeoutException;
 import kr.devdogs.langexec.core.exception.RunningFailedException;
 import kr.devdogs.langexec.core.output.OutputDelegate;
 import kr.devdogs.langexec.core.event.ProcessEventListener;
@@ -19,19 +21,45 @@ import kr.devdogs.langexec.core.util.FileUtils;
 
 public class JavaRunner implements LanguageRunner, ProcessEventListener {
 	private LanguageCompiler complier;
-	private List<String> resultList;
+	private File sourceFile;
+	private String compiledClassPath;
+	private long timeoutMillis;
+	private boolean processTimeout;
+	private RunningOutput output;
+
+	public JavaRunner(File sourceFile, LanguageCompiler compiler) {
+		this(sourceFile, 10000L, compiler);
+	}
 	
-	public JavaRunner(LanguageCompiler compiler) {
+	public JavaRunner(File sourceFile, long timeoutMillis, LanguageCompiler compiler) {
 		this.complier = compiler;
-		this.resultList = new ArrayList<>();
+		this.sourceFile = sourceFile;
+		this.compiledClassPath = compile(sourceFile);
+		this.timeoutMillis = timeoutMillis;
+		this.processTimeout = true;
+	}
+	
+	
+	@Override
+	public RunningOutput run() {
+		return run(null);
 	}
 	
 	@Override
-	public List<String> run(File sourceFile, List<String> inputLines) {
-		String compiledClassPath = compile(sourceFile);
-		List<String> runResult = execute(sourceFile, inputLines);
-		new File(compiledClassPath).delete();
-		return runResult;
+	public RunningOutput run(List<String> inputLines) {
+		this.output = new RunningOutput();
+		File compiledFile = new File(compiledClassPath);
+		
+		if(compiledFile.exists()) {
+			long startTime = System.currentTimeMillis();
+			execute(sourceFile, inputLines);
+			long endTime = System.currentTimeMillis();
+			
+			output.setRunningTime(endTime-startTime);
+		} else {
+			throw new CompileFailException("File not created");
+		}
+		return this.output;
 	}
 	
 	private String compile(File sourceFile) {
@@ -48,13 +76,8 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 		return compiledFilePath;
 	}
 	
-	/**
-	 * 
-	 * @param sourceFile
-	 * @param inputLines
-	 * @return outputLines
-	 */
-	private synchronized List<String> execute(File sourceFile, List<String> inputLines) {
+	
+	private synchronized void execute(File sourceFile, List<String> inputLines) {
 		String filePath = FileUtils.getAbsolutePath(sourceFile);
 		String fileName = FileUtils.getFileName(sourceFile);
 		
@@ -77,8 +100,11 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 					e.printStackTrace();
 				}
 			}
-			wait();
-			return this.resultList;
+			wait(this.timeoutMillis);
+			
+			if(this.processTimeout) {
+				throw new ProcessTimeoutException();
+			}
 		} catch(Exception e ) {
 			throw new RunningFailedException(e);
 		}
@@ -86,11 +112,12 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 
 	@Override
 	public void onOutput(String outputLines) {
-		this.resultList.add(outputLines);
+		this.output.getOutputLines().add(outputLines);
 	}
 
 	@Override
 	public synchronized void onProcessDestroy() {
+		this.processTimeout = false;
 		notify();
 	}
 }

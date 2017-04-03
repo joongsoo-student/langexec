@@ -1,25 +1,29 @@
 package kr.devdogs.langexec;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class LiveConsoleSample {
 	public static void main(String[] arg) {
 		try(Scanner scan = new Scanner(System.in)) {
 			File sourceFile = new File("/Users/st/Test.java");
-			LanguageLiveConsole shell = LiveConsoleFactory.getJavaLiveConsole(sourceFile);
+			LanguageLiveConsole console = LiveConsoleFactory.getJavaLiveConsole(sourceFile);
 			
-			shell.addOnOutputListener(new CustomOnOutputListener() {
+			console.addOnOutputListener(new CustomOnOutputListener() {
 				@Override
 				public void onOutput(String output) {
 					System.out.print(output);
 				}
 			});
 			
-			while(shell.isRunning()) {
+			do {
 				String line = scan.nextLine();
-				shell.writeLine(line);
-			}
+				try{
+				console.writeLine(line);
+				}catch(Exception e) {}
+			}while(console.isRunning());
 		}
 	}
 }

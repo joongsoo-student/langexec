@@ -20,18 +20,18 @@ public class OutputDelegate extends Thread {
 
 	@Override
 	public void run() {
+		
 		try {
-			dead:while(true) {
+			while(true) {
 				if(m_isInputStream.available() > 0 || m_esErrorStream.available() > 0) {
 					InputStream stream = m_isInputStream.available() > 0 ? m_isInputStream : m_esErrorStream;
 					byte[] b = new byte[stream.available()];
 					stream.read(b);
 					String output = new String(b);
-					
 					listener.onOutput(output);
-					if(!currentProcess.isAlive()) {
-						break dead;
-					}
+				}
+				if(!currentProcess.isAlive()) {
+					break;
 				}
 				Thread.sleep(100L);
 			}

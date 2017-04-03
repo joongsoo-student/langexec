@@ -27,7 +27,6 @@ public class JavaCompiler implements LanguageCompiler, ProcessEventListener {
 		builder.directory(new File(filePath));
 		Process compileProc = builder.start();
 		
-		
 		try {
 			compileProc.waitFor();
 		} catch (InterruptedException e) {
