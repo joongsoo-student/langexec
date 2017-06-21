@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>kr.devdogs</groupId>
   <artifactId>langexec</artifactId>
-  <version>0.1</version>
+  <version>0.12</version>
   <name>Lang Exec</name>
   <description>Programming language source compile and run</description>
   
@@ -72,6 +72,10 @@
 			        <goals>
 			            <goal>jar</goal>
 			        </goals>
+				        
+	          <configuration>
+	          <additionalparam>${javadoc.opts}</additionalparam>
+	          </configuration>
 			        </execution>
 			    </executions>
 			</plugin>
@@ -101,7 +105,17 @@
 		<connection>https://github.com/JSDanielPark/langexec.git</connection>
 		<url>https://github.com/JSDanielPark/langexec</url>
 	</scm>
-	
+	<profiles>
+	  <profile>
+	    <id>doclint-java8-disable</id>
+	    <activation>
+	      <jdk>[1.8,)</jdk>
+	    </activation>
+	    <properties>
+	      <javadoc.opts>-Xdoclint:none</javadoc.opts>
+	    </properties>
+	  </profile>
+	</profiles>
 
 	<developers>
 		<developer>
