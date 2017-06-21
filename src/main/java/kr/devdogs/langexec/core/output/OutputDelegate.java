@@ -20,7 +20,6 @@ public class OutputDelegate extends Thread {
 
 	@Override
 	public void run() {
-		
 		try {
 			while(true) {
 				if(m_isInputStream.available() > 0 || m_esErrorStream.available() > 0) {

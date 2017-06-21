@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,6 +19,7 @@ import kr.devdogs.langexec.core.exception.RunningFailedException;
 import kr.devdogs.langexec.core.output.OutputDelegate;
 import kr.devdogs.langexec.core.event.ProcessEventListener;
 import kr.devdogs.langexec.core.util.FileUtils;
+import kr.devdogs.langexec.core.util.ProcessUtils;
 
 public class JavaRunner implements LanguageRunner, ProcessEventListener {
 	private LanguageCompiler complier;
@@ -57,7 +59,7 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 			
 			output.setRunningTime(endTime-startTime);
 		} else {
-			throw new CompileFailException("File not created");
+			throw new CompileFailException("Class file not created");
 		}
 		return this.output;
 	}
@@ -85,6 +87,7 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 			ProcessBuilder builder = new ProcessBuilder("java", fileName);
 			builder.directory(new File(filePath));
 			Process process = builder.start();
+			System.out.println(ProcessUtils.getPidOfProcess(process));
 			
 			OutputStream stdin = process.getOutputStream();
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
@@ -112,7 +115,10 @@ public class JavaRunner implements LanguageRunner, ProcessEventListener {
 
 	@Override
 	public void onOutput(String outputLines) {
-		this.output.getOutputLines().add(outputLines);
+		String[] lines = outputLines.split("\n");
+		for(String line:lines) {
+			this.output.getOutputLines().add(line);
+		}
 	}
 
 	@Override
