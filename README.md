@@ -2,6 +2,17 @@ LangExec
 ===================
 Programming Language compile and run library
 
+
+## Get Started
+Add maven dependancy
+```xml
+<dependency>
+  <groupId>kr.devdogs</groupId>
+  <artifactId>langexec</artifactId>
+  <version>0.1</version>
+</dependency>
+```
+
 ## Example
 ### Live Shell
 Compile and Run a Java program that outputs the input as it is
