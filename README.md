@@ -13,6 +13,15 @@ Add maven dependancy
 </dependency>
 ```
 
+## Available project
+- Algorithm traning site
+- Student assignment system
+
+## Provided
+- Source code compile & receive compile result message
+- Running source code program & get output of std output
+- Interactive shell of programs using standard std input
+
 ## Example
 ### Live Shell
 Compile and Run a Java program that outputs the input as it is
